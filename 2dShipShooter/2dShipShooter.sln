@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2dShipShooter", "2dShipShooter\2dShipShooter\2dShipShooter.csproj", "{63A7D644-E3E6-476A-9474-2671EEF1A6FA}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "2dShipShooterContent", "2dShipShooter\2dShipShooterContent\2dShipShooterContent.contentproj", "{0380862B-00A2-4B07-AD86-143834473F12}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63A7D644-E3E6-476A-9474-2671EEF1A6FA}.Debug|x86.ActiveCfg = Debug|x86
+		{63A7D644-E3E6-476A-9474-2671EEF1A6FA}.Debug|x86.Build.0 = Debug|x86
+		{63A7D644-E3E6-476A-9474-2671EEF1A6FA}.Release|x86.ActiveCfg = Release|x86
+		{63A7D644-E3E6-476A-9474-2671EEF1A6FA}.Release|x86.Build.0 = Release|x86
+		{0380862B-00A2-4B07-AD86-143834473F12}.Debug|x86.ActiveCfg = Debug|x86
+		{0380862B-00A2-4B07-AD86-143834473F12}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
