@@ -39,6 +39,8 @@ namespace _2dShipShooter
             float circle = MathHelper.Pi * 2;
             RotationAngle = RotationAngle % circle;
 
+            
+
         }
     }
 
@@ -51,12 +53,14 @@ namespace _2dShipShooter
         public float speedMod {get;set;}
         public int f;
         public int type{get;set;}
+        float value = 0; 
 
-        public bullet(Texture2D _myTexture, Vector2 _startLocation)
+        public bullet(Texture2D _myTexture, Vector2 _startLocation, float _value)
         {
             RotationAngle = 1.57f;
             speedMod = 10;
             type = 1;
+            value = _value;
             origin.X = _myTexture.Width / 2;
             origin.Y = _myTexture.Height / 2;
             screenpos.X = _startLocation.X - (_myTexture.Width / 2.0f);
@@ -78,6 +82,9 @@ namespace _2dShipShooter
             {
                 f++;
             }
+
+            screenpos.X += ((value / 100.0f) + 0.4f) * (1 * speedMod);
+            screenpos.Y += (1 * speedMod) * (float)Math.Cos((value / 100.0f) * f);
 
         }
 
@@ -125,7 +132,7 @@ namespace _2dShipShooter
             // setup the event
             
             myThinkGear.ThinkGearChanged += _thinkGearWrapper_ThinkGearChanged;
-            myThinkGear.Connect("COM27", 57600, true);
+            myThinkGear.Connect("COM3", 57600, true);
 
 
             base.Initialize();
@@ -199,14 +206,13 @@ namespace _2dShipShooter
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && canShoot == true)
             {
                 canShoot = false; 
-                bullets.Add(new bullet(txbullet, myShip.screenpos));
+                bullets.Add(new bullet(txbullet, myShip.screenpos,value));
             }
 
             foreach (bullet e in bullets)
             {
                 e.update();
-                e.screenpos.X +=  0.8f * (1*e.speedMod);
-                e.screenpos.Y += (1 * e.speedMod) * (float)Math.Cos((value/100.0f)*e.f);
+
             }
             base.Update(gameTime);
         }

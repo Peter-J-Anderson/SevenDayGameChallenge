@@ -22,6 +22,8 @@ namespace Mr_Potato_Adventure
         MrPotatoHead myPotato;
         Texture2D TxMrPotato;
 
+        Texture2D txMash; 
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
