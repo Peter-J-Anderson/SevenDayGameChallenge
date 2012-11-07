@@ -19,11 +19,19 @@ namespace Mr_Potato_Adventure
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        bool hasToggled = false;
+
         MrPotatoHead myPotato;
+
+        List<Texture2D> PotatoTransform;
+
         Texture2D TxMrPotato;
-
-        Texture2D txMash; 
-
+        Texture2D TxInstantMash;
+        Texture2D TxSmoke; 
+        Texture2D txMash;
+   
+        Animation AnimSmoke;
+        List<Animation> AnimationList;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -38,8 +46,18 @@ namespace Mr_Potato_Adventure
         /// </summary>
         protected override void Initialize()
         {
+            TxSmoke = Content.Load<Texture2D>("smoke");
             TxMrPotato = Content.Load<Texture2D>("_SS_PotatoHead");
-            myPotato = new MrPotatoHead(TxMrPotato, new Vector2(100,100)); 
+            TxInstantMash = Content.Load<Texture2D>("InstantMash");
+            PotatoTransform = new List<Texture2D>();
+            PotatoTransform.Add(TxMrPotato);
+            PotatoTransform.Add(TxInstantMash);
+            
+            myPotato = new MrPotatoHead(PotatoTransform, new Vector2(100,400));
+            AnimationList = new List<Animation>();
+            
+            
+
 
             base.Initialize();
         }
@@ -80,6 +98,21 @@ namespace Mr_Potato_Adventure
                 myPotato.moveRight();
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
                 myPotato.moveLeft();
+            foreach(Animation e in AnimationList)
+                e.update();
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && hasToggled == false)
+            {
+                hasToggled = true;
+                AnimationList.Add(new Animation(TxSmoke, 5, new Vector2(myPotato.screenpos.X, myPotato.screenpos.Y - 40)));
+                myPotato.Transform();
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Space) && hasToggled == true)
+            {
+                hasToggled = false;
+
+            }
 
             base.Update(gameTime);
         }
@@ -93,6 +126,8 @@ namespace Mr_Potato_Adventure
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
+
+
             if (myPotato.direction == 2)
             spriteBatch.Draw(myPotato.spriteTexture, myPotato.screenpos,
                              new Rectangle(myPotato.currentFrameX * myPotato.spriteWidth,
@@ -105,6 +140,19 @@ namespace Mr_Potato_Adventure
                                                myPotato.currentFrameY * myPotato.spriteHeight,
                                                myPotato.spriteWidth, myPotato.spriteHeight), Color.White,
                                                0f, myPotato.origin, 1.0f, SpriteEffects.None, 0);
+
+            foreach (Animation e in AnimationList)
+            {
+                
+                spriteBatch.Draw(e.myTexture, e.screenpos, e.sourceRect, Color.White,
+                                   0.0f, e.origin, 1.0f, SpriteEffects.None, 0);
+                if (e.currentFrame == e.noFrame)
+                {
+                    AnimationList.Remove(e);
+                    break;
+                }
+            }
+
 
 
             spriteBatch.End();
