@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -9,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
+
 namespace Mr_Potato_Adventure
 {
     class MrPotatoHead
@@ -17,23 +19,30 @@ namespace Mr_Potato_Adventure
         public Vector2 origin;
         public Vector2 screenpos;
         public float speedMod { get; set; }
-        public int type { get; set; }
+        
 
-        public Texture2D spriteTexture;
-        float timer = 0f;
-        float interval = 200f;
+        
+        public int type { get; set; }
         public int currentFrameX = 0;
-        public int currentFrameY = 0;
         public int spriteWidth { get; set; }
         public int spriteHeight { get; set; }
         public int direction { get; set; }
-        Rectangle sourceRect;
+        public const int jumpingLimit = 100;
+        public int currentJump = 0;
+        public int[] jumpingPath = new int[jumpingLimit];
+
+        public string startTime = ""; 
+
         List<Texture2D> textureList;
+        public Texture2D spriteTexture;
 
-
+        public bool canTransform { get; set; }
+        public bool isJumping { get; set; }
         //constructor 
         public MrPotatoHead(List<Texture2D> _myTexture, Vector2 _startLocation)
         {
+            canTransform = false;
+            isJumping = false; 
             speedMod = 3;
             direction = 2; 
             type = 0;
@@ -46,22 +55,24 @@ namespace Mr_Potato_Adventure
             
             spriteTexture = _myTexture[type];
 
+            for (int i = 0; i < jumpingLimit / 2; i++)
+            {
+                jumpingPath[i] = -1;
+            }
+            for (int i = jumpingLimit / 2; i < jumpingLimit ; i++)
+            {
+                jumpingPath[i] = 1;
+            }
+
         }
 
         public void moveLeft()
         {
             direction = 0;
             screenpos.X -= 1.0f * speedMod;
-            if (currentFrameX == 0 && currentFrameY == 0)
+            if (currentFrameX == 0 )
             {
-                currentFrameX = 9;
-                currentFrameY = 0;
-            }
-            if (currentFrameX == 0 && currentFrameY == 1)
-            {
-                direction = 2;
-                currentFrameX = 9;
-                currentFrameY = 0;
+                currentFrameX = 19;
             }
             currentFrameX--;
         }
@@ -70,25 +81,46 @@ namespace Mr_Potato_Adventure
         {
             direction = 2;
             screenpos.X += 1.0f * speedMod;
-            if (currentFrameX == 19 && currentFrameY == 0)
+            if (currentFrameX == 19)
             {
                 currentFrameX = 0;
-                currentFrameY = 0; 
-            }
-            if (currentFrameX == 19 && currentFrameY == 1)
-            {
-                
-                currentFrameX = 0;
-                currentFrameY = 0;
             }
             currentFrameX++;
         }
 
+        public void update()
+        {
+            if (!isJumping)
+            {
+                return;
+            }
+            else if (currentJump == jumpingLimit)
+            {
+                  isJumping = false;
+                currentJump = 0; 
+            }
+            else
+            {
+                screenpos.Y += jumpingPath[currentJump];
+                currentJump++;
+            }
+
+        }
+
         public void Transform()
         {
-            type++;
-            type %= 2;
-            spriteTexture = textureList[type];
+            if (canTransform)
+            {
+                type++;
+                type %= 2;
+                spriteTexture = textureList[type];
+            }
+            else if (!canTransform)
+            {
+                type = 0;
+                spriteTexture = textureList[type];
+            }
+
         }
     }
 

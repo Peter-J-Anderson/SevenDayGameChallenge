@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -8,6 +9,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using ThinkGearNET;
 
 namespace Mr_Potato_Adventure
 {
@@ -19,7 +21,9 @@ namespace Mr_Potato_Adventure
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        bool hasToggled = false;
+        bool hasToggledSpace = false;
+        bool hasToggledT = false;
+        bool hasToggledAttent = false;
 
         MrPotatoHead myPotato;
 
@@ -27,14 +31,21 @@ namespace Mr_Potato_Adventure
 
         Texture2D TxMrPotato;
         Texture2D TxInstantMash;
-        Texture2D TxSmoke; 
-        Texture2D txMash;
-   
-        Animation AnimSmoke;
+        Texture2D TxSmoke;
+        Texture2D TxFloor; 
+
         List<Animation> AnimationList;
+
+        ThinkGearWrapper myThinkGear;
+        float myAttention; 
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferHeight = 420;
+            graphics.PreferredBackBufferWidth = 640;
+
             Content.RootDirectory = "Content";
         }
 
@@ -46,17 +57,25 @@ namespace Mr_Potato_Adventure
         /// </summary>
         protected override void Initialize()
         {
+            
+
+            myThinkGear = new ThinkGearWrapper();
             TxSmoke = Content.Load<Texture2D>("smoke");
             TxMrPotato = Content.Load<Texture2D>("_SS_PotatoHead");
             TxInstantMash = Content.Load<Texture2D>("InstantMash");
+            TxFloor = Content.Load<Texture2D>("Floor");
             PotatoTransform = new List<Texture2D>();
             PotatoTransform.Add(TxMrPotato);
             PotatoTransform.Add(TxInstantMash);
             
-            myPotato = new MrPotatoHead(PotatoTransform, new Vector2(100,400));
+            myPotato = new MrPotatoHead(PotatoTransform, new Vector2(0,0));
             AnimationList = new List<Animation>();
-            
-            
+
+            if (!myThinkGear.Connect("COM27", 57600, true))
+            {
+                this.Exit(); 
+            }
+            myAttention = myThinkGear.ThinkGearState.Attention;
 
 
             base.Initialize();
@@ -90,6 +109,9 @@ namespace Mr_Potato_Adventure
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+
+            Window.Title = gameTime.TotalGameTime.Duration().Seconds.ToString();
+
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -101,18 +123,61 @@ namespace Mr_Potato_Adventure
             foreach(Animation e in AnimationList)
                 e.update();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && hasToggled == false)
+
+            //***************************************************************************************************************
+            // Key Toggles
+            //***************************************************************************************************************
+            // Toggle 'T'
+            if (Keyboard.GetState().IsKeyDown(Keys.T) && hasToggledT == false)
             {
-                hasToggled = true;
+                hasToggledT = true;
                 AnimationList.Add(new Animation(TxSmoke, 5, new Vector2(myPotato.screenpos.X, myPotato.screenpos.Y - 40)));
                 myPotato.Transform();
             }
 
-            if (Keyboard.GetState().IsKeyUp(Keys.Space) && hasToggled == true)
+            if (Keyboard.GetState().IsKeyUp(Keys.T) && hasToggledT == true)
             {
-                hasToggled = false;
+                hasToggledT = false;
 
             }
+
+            // Toggle 'Space'
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && hasToggledSpace == false)
+            {
+                hasToggledSpace = true;
+                myPotato.isJumping = true;
+                
+                
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Space) && hasToggledSpace == true)
+            {
+                hasToggledSpace = false;
+
+            }
+
+            //***************************************************************************************************************
+            // Mindwave Toggles
+            //***************************************************************************************************************
+            if (myAttention > 75 && hasToggledAttent == false)
+            {
+                myPotato.canTransform = true;
+                hasToggledAttent = true;
+                // set time stamp for being able to transform.
+               
+               
+            }
+
+            if (myAttention < 75 && hasToggledAttent == true)
+            {
+                hasToggledAttent = false;
+
+            }
+
+
+            myPotato.update();
+            myAttention = myThinkGear.ThinkGearState.Attention;
+            //Window.Title = myAttention.ToString() ;
 
             base.Update(gameTime);
         }
@@ -126,18 +191,20 @@ namespace Mr_Potato_Adventure
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-
+            //draw floor
+            spriteBatch.Draw(TxFloor, new Vector2(0 - myPotato.screenpos.X, 420-TxFloor.Height), 
+                            new Rectangle(0, 0, TxFloor.Width, TxFloor.Height), Color.White);
 
             if (myPotato.direction == 2)
-            spriteBatch.Draw(myPotato.spriteTexture, myPotato.screenpos,
+            spriteBatch.Draw(myPotato.spriteTexture, new Vector2(300,345 + myPotato.screenpos.Y),
                              new Rectangle(myPotato.currentFrameX * myPotato.spriteWidth,
-                                           myPotato.currentFrameY * myPotato.spriteHeight, 
+                                           0, 
                                            myPotato.spriteWidth, myPotato.spriteHeight), Color.White,
                                            0f, myPotato.origin, 1.0f, SpriteEffects.FlipHorizontally, 0);
             if (myPotato.direction == 0)
-                spriteBatch.Draw(myPotato.spriteTexture, myPotato.screenpos,
+                spriteBatch.Draw(myPotato.spriteTexture, new Vector2(300, 345 + myPotato.screenpos.Y),
                                  new Rectangle(myPotato.currentFrameX * myPotato.spriteWidth,
-                                               myPotato.currentFrameY * myPotato.spriteHeight,
+                                               0,
                                                myPotato.spriteWidth, myPotato.spriteHeight), Color.White,
                                                0f, myPotato.origin, 1.0f, SpriteEffects.None, 0);
 
