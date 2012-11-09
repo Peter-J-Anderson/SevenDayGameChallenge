@@ -20,7 +20,7 @@ namespace Mr_Potato_Adventure
         public Vector2 screenpos;
         public float speedMod { get; set; }
         
-
+        
         
         public int type { get; set; }
         public int currentFrameX = 0;
