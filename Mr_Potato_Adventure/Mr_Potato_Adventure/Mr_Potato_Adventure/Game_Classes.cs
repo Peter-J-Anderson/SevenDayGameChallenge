@@ -19,9 +19,13 @@ namespace Mr_Potato_Adventure
         public Vector2 origin;
         public Vector2 screenpos;
         public float speedMod { get; set; }
-        
-        
-        
+
+        TimeSpan timer;
+
+        public int health;
+
+        public bool smoke = false; 
+
         public int type { get; set; }
         public int currentFrameX = 0;
         public int spriteWidth { get; set; }
@@ -31,7 +35,8 @@ namespace Mr_Potato_Adventure
         public int currentJump = 0;
         public int[] jumpingPath = new int[jumpingLimit];
 
-        public TimeSpan startTime; 
+        public TimeSpan startTime;
+        TimeSpan startSmash; 
 
         List<Texture2D> textureList;
         public Texture2D spriteTexture;
@@ -39,7 +44,7 @@ namespace Mr_Potato_Adventure
         public bool canTransform { get; set; }
         public bool isJumping { get; set; }
         //constructor 
-        public MrPotatoHead(List<Texture2D> _myTexture, Vector2 _startLocation)
+        public MrPotatoHead(List<Texture2D> _myTexture, Vector2 _startLocation, int _health)
         {
             canTransform = false;
             isJumping = false; 
@@ -52,7 +57,9 @@ namespace Mr_Potato_Adventure
             origin.X = spriteWidth / 2;
             origin.Y = spriteHeight / 2;
             screenpos = _startLocation;
-            
+
+            health = _health;
+
             spriteTexture = _myTexture[type];
 
             for (int i = 0; i < jumpingLimit / 2; i++)
@@ -88,11 +95,19 @@ namespace Mr_Potato_Adventure
             currentFrameX++;
         }
 
-        public void update(TimeSpan timer)
+        public void update(TimeSpan _timer)
         {
+
+            timer = _timer;
             TimeSpan cooldowntrans = new TimeSpan(0, 0, 0, 5, 0);
             if ((timer - startTime) >= cooldowntrans && canTransform)
-                canTransform = false; 
+                canTransform = false;
+            if ((timer - startSmash) >= cooldowntrans && type == 1)
+            {
+                type = 0;
+                spriteTexture = textureList[type];
+                smoke = true;
+            }
             if (!isJumping)
             {
                 return;
@@ -114,6 +129,7 @@ namespace Mr_Potato_Adventure
         {
             if (canTransform)
             {
+                startSmash = timer;
                 type++;
                 type %= 2;
                 spriteTexture = textureList[type];
@@ -123,6 +139,8 @@ namespace Mr_Potato_Adventure
                 type = 0;
                 spriteTexture = textureList[type];
             }
+
+
 
         }
     }

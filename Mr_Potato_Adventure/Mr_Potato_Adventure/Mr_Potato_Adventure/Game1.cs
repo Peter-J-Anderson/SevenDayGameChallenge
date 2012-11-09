@@ -26,8 +26,10 @@ namespace Mr_Potato_Adventure
         bool hasToggledAttent = false;
 
         MrPotatoHead myPotato;
+        MrPotatoHead little_alien; 
 
         List<Texture2D> PotatoTransform;
+        List<Texture2D> Little_Alien_Alien;
 
         Texture2D TxMrPotato;
         Texture2D TxInstantMash;
@@ -49,16 +51,23 @@ namespace Mr_Potato_Adventure
         Texture2D homeInfo;
         Texture2D homeExit;
         Texture2D infoScreen;
+        Texture2D alien; 
         int selectedItem = 0;
 
         // menu selection 
         TimeSpan lastChecked;
         TimeSpan menuCooldown = new TimeSpan(0, 0, 0, 0, 100);
-       
+        List<MrPotatoHead> alienList = new List<MrPotatoHead>();
 
+
+        bool isFalling = false; 
         //sound
         Song music;
 
+
+        int alienCurrentStep = 0; 
+        int[] alien_movement = new int[48] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                                            -2, -2, -2, -2, -2, -2,-2, -2, -2, -2, -2, -2,-2, -2, -2, -2, -2, -2,-2, -2, -2, -2, -2, -2 };
 
         public Game1()
         {
@@ -86,8 +95,12 @@ namespace Mr_Potato_Adventure
             TxInstantMash = Content.Load<Texture2D>("InstantMash");
             TxFloor = Content.Load<Texture2D>("Floor");
             PotatoTransform = new List<Texture2D>();
+            Little_Alien_Alien = new List<Texture2D>();
+
             PotatoTransform.Add(TxMrPotato);
             PotatoTransform.Add(TxInstantMash);
+            alien = Content.Load<Texture2D>("Aliens");
+            Little_Alien_Alien.Add(alien);
 
             //homescreen 
             homeScreen = Content.Load<Texture2D>("Home_Screen");
@@ -101,10 +114,18 @@ namespace Mr_Potato_Adventure
             // menu selection 
             lastChecked = new TimeSpan(0, 0, 0, 0, 0);
 
-            myPotato = new MrPotatoHead(PotatoTransform, new Vector2(0, 0));
+            myPotato = new MrPotatoHead(PotatoTransform, new Vector2(0, 0),200);
+
+            
+            
+            alienList.Add(new MrPotatoHead(Little_Alien_Alien, new Vector2(-300 + (TxFloor.Width * 1), 0),100));
+            alienList.Add(new MrPotatoHead(Little_Alien_Alien, new Vector2(-300 + (TxFloor.Width * 2), 0), 100));
+            alienList.Add(new MrPotatoHead(Little_Alien_Alien, new Vector2(-300 + (TxFloor.Width * 3), 0), 100));
+
+
             AnimationList = new List<Animation>();
 
-            if (!myThinkGear.Connect("COM24", 57600, true))
+            if (!myThinkGear.Connect("COM3", 57600, true))
             {
                 this.Exit();
             }
@@ -154,7 +175,8 @@ namespace Mr_Potato_Adventure
                     if (Keyboard.GetState().IsKeyDown(Keys.Up))
                     {
                         selectedItem--;
-                        selectedItem = Math.Abs(selectedItem);
+                        if (selectedItem == -1)
+                            selectedItem = 2; 
                         selectedItem %= 3;
                     }
                     if (Keyboard.GetState().IsKeyDown(Keys.Down))
@@ -187,20 +209,80 @@ namespace Mr_Potato_Adventure
                     break; 
                     
                 case 1:
-                    Window.Title = myPotato.canTransform.ToString() + "     " + myAttention.ToString();
-
                     
+
+                    //for each 
+                    alienCurrentStep++;
+                    alienCurrentStep %= 48;
+                    foreach (MrPotatoHead e in alienList)
+                    {
+                        e.screenpos.X += alien_movement[alienCurrentStep] * e.speedMod;
+                        if (e.health <= 0)
+                        {
+                            alienList.Remove(e);
+                            break;
+                        }
+                    }
+
+
+
+                    if (myPotato.health <= 0)
+                    {
+                        Exit();
+                    }
+
+                    Window.Title = "canTransform: " +  myPotato.canTransform.ToString() + "     myAttention: " + myAttention.ToString() + "     Mr Potato's HP: " + myPotato.health.ToString();
+                    // check collision
+                    foreach (MrPotatoHead e in alienList)
+                    {
+
+                      
+                        if (myPotato.type == 0)
+                        {
+                            // take damage
+                            if (e.screenpos.X >= myPotato.screenpos.X - 10 && e.screenpos.X <= myPotato.screenpos.X + 10)
+                            {
+
+                                myPotato.health -= 10;
+
+                                break;
+                            }
+
+                        }
+                        else
+                        {
+                            // give damage
+                            if (e.screenpos.X >= myPotato.screenpos.X - 10 && e.screenpos.X <= myPotato.screenpos.X + 10)
+                            {
+                                e.health -= 10;
+
+                            }
+
+
+                        }
+                    }
+                    if (myPotato.screenpos.X < -300 || myPotato.screenpos.X > (-300 + TxFloor.Width* 5))
+                    {
+                        isFalling = true;
+                    }
 
                     // Allows the game to exit
                     if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                         this.Exit();
                     if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                    {
                         myPotato.moveRight();
+                     
+                    }
                     if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                    {
                         myPotato.moveLeft();
+
+                    }
                     foreach (Animation e in AnimationList)
                         e.update();
-
+                    if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                        gameState = 0; 
 
                     //***************************************************************************************************************
                     // Key Toggles
@@ -251,10 +333,23 @@ namespace Mr_Potato_Adventure
                         hasToggledAttent = false;
 
                     }
+                    myPotato.update(timer);
+
+
+
+                    
                     break;
+                    
             }
 
-            myPotato.update(timer);
+            if (myPotato.smoke)
+            {
+                AnimationList.Add(new Animation(TxSmoke, 5, new Vector2(300, 345 + myPotato.screenpos.Y - 40)));
+                myPotato.smoke = false;
+            }
+                if (isFalling)
+                myPotato.screenpos.Y++;
+          
             myAttention = myThinkGear.ThinkGearState.Attention;
             //Window.Title = myAttention.ToString() ;
 
@@ -306,9 +401,18 @@ namespace Mr_Potato_Adventure
                 case 1:
                     //start game 
 
+
+                   
+
+
+
+
                     //draw floor
-                    spriteBatch.Draw(TxFloor, new Vector2(0 - myPotato.screenpos.X, 420 - TxFloor.Height),
-                                    new Rectangle(0, 0, TxFloor.Width, TxFloor.Height), Color.White);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        spriteBatch.Draw(TxFloor, new Vector2((i * TxFloor.Width) - myPotato.screenpos.X, 420 - TxFloor.Height),
+                                        new Rectangle(0, 0, TxFloor.Width, TxFloor.Height), Color.White);
+                    }
 
                     if (myPotato.direction == 2)
                         spriteBatch.Draw(myPotato.spriteTexture, new Vector2(300, 345 + myPotato.screenpos.Y),
@@ -322,6 +426,16 @@ namespace Mr_Potato_Adventure
                                                        0,
                                                        myPotato.spriteWidth, myPotato.spriteHeight), Color.White,
                                                        0f, myPotato.origin, 1.0f, SpriteEffects.None, 0);
+
+                    // draw badguys 
+
+                    foreach (MrPotatoHead e in alienList)
+                    spriteBatch.Draw(e.spriteTexture, new Vector2(300 + e.screenpos.X - myPotato.screenpos.X, 345 + e.screenpos.Y),
+                                         new Rectangle(e.currentFrameX * e.spriteWidth,
+                                                       0,
+                                                       e.spriteWidth, e.spriteHeight), Color.White,
+                                                       0f, e.origin, 1.0f, SpriteEffects.None, 0);
+
 
                     foreach (Animation e in AnimationList)
                     {
