@@ -31,7 +31,7 @@ namespace Mr_Potato_Adventure
         public int currentJump = 0;
         public int[] jumpingPath = new int[jumpingLimit];
 
-        public string startTime = ""; 
+        public TimeSpan startTime; 
 
         List<Texture2D> textureList;
         public Texture2D spriteTexture;
@@ -88,8 +88,11 @@ namespace Mr_Potato_Adventure
             currentFrameX++;
         }
 
-        public void update()
+        public void update(TimeSpan timer)
         {
+            TimeSpan cooldowntrans = new TimeSpan(0, 0, 0, 5, 0);
+            if ((timer - startTime) >= cooldowntrans && canTransform)
+                canTransform = false; 
             if (!isJumping)
             {
                 return;

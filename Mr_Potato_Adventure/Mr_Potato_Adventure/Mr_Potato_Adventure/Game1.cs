@@ -37,7 +37,10 @@ namespace Mr_Potato_Adventure
         List<Animation> AnimationList;
 
         ThinkGearWrapper myThinkGear;
-        float myAttention; 
+        float myAttention;
+
+        TimeSpan timer;
+
 
         public Game1()
         {
@@ -71,7 +74,7 @@ namespace Mr_Potato_Adventure
             myPotato = new MrPotatoHead(PotatoTransform, new Vector2(0,0));
             AnimationList = new List<Animation>();
 
-            if (!myThinkGear.Connect("COM27", 57600, true))
+            if (!myThinkGear.Connect("COM24", 57600, true))
             {
                 this.Exit(); 
             }
@@ -110,7 +113,9 @@ namespace Mr_Potato_Adventure
         protected override void Update(GameTime gameTime)
         {
 
-            Window.Title = gameTime.TotalGameTime.Duration().Seconds.ToString();
+            Window.Title = myPotato.canTransform.ToString() + "     " + myAttention.ToString();
+
+            timer += gameTime.ElapsedGameTime; 
 
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
@@ -131,7 +136,7 @@ namespace Mr_Potato_Adventure
             if (Keyboard.GetState().IsKeyDown(Keys.T) && hasToggledT == false)
             {
                 hasToggledT = true;
-                AnimationList.Add(new Animation(TxSmoke, 5, new Vector2(myPotato.screenpos.X, myPotato.screenpos.Y - 40)));
+                AnimationList.Add(new Animation(TxSmoke, 5, new Vector2(300,345 + myPotato.screenpos.Y - 40)));
                 myPotato.Transform();
             }
 
@@ -163,6 +168,7 @@ namespace Mr_Potato_Adventure
             {
                 myPotato.canTransform = true;
                 hasToggledAttent = true;
+                myPotato.startTime = timer; 
                 // set time stamp for being able to transform.
                
                
@@ -175,7 +181,7 @@ namespace Mr_Potato_Adventure
             }
 
 
-            myPotato.update();
+            myPotato.update(timer);
             myAttention = myThinkGear.ThinkGearState.Attention;
             //Window.Title = myAttention.ToString() ;
 

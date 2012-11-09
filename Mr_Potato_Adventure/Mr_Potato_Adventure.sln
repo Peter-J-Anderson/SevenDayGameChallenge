@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mr_Potato_Adventure", "Mr_Potato_Adventure\Mr_Potato_Adventure\Mr_Potato_Adventure.csproj", "{CC823B34-93D1-4EC8-ADDB-3E7621301F97}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Mr_Potato_AdventureContent", "Mr_Potato_Adventure\Mr_Potato_AdventureContent\Mr_Potato_AdventureContent.contentproj", "{4DBFAA80-88F1-417D-B337-12E46DAA961B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mr_Potato_AdventureContent", "Mr_Potato_Adventure\Mr_Potato_AdventureContent\Mr_Potato_AdventureContent.contentproj", "{4DBFAA80-88F1-417D-B337-12E46DAA961B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52A02E59-24FB-4BC3-96D0-A92731ED4980}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
